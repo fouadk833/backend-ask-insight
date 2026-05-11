@@ -1,0 +1,112 @@
+name: "DEV - Deploy image to ECS: backend API service "
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - develop  
+
+env:
+  AWS_REGION: eu-west-1
+  REPOSITORY: opella/periscope/be
+  CONTAINER_NAME: Periscope-BE-DEV
+  ECS_SERVICE: Periscope-BE-DEV-service
+  ECS_CLUSTER: Periscope-BE-DEV-cluster
+  DOCKERFILE: Dockerfile
+  TASK_DEFINITION: Periscope-BE-DEV
+  IMAGE_TAG: latest
+
+jobs:
+  build-container:
+    runs-on: [atmos-aws-arc-runner-set]
+    environment: dev
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: Sanofi-InnerSource/github-actions-library/setup-root-ca@main
+      - name: Checkout
+        uses: actions/checkout@v4
+      # Comment for diveai runner
+      - name: Install AWS CLI
+        run: |
+          sudo apt update
+          sudo apt -y install curl unzip
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+          unzip awscliv2.zip
+          sudo ./aws/install
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.IAM_ROLE }}
+          role-session-name: github-session
+          aws-region: eu-west-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: "211125721469"
+        env:
+          HTTP_PROXY: ""
+      - name: Build and tag docker backend image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ env.REPOSITORY }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
+        run: |
+          echo $SNOWFLAKE_PRIVATE_KEY >> sf_df_private_key
+          cat sf_df_private_key | wc -c
+          docker build -f $DOCKERFILE -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+      - name: Push docker backend image to Amazon ECR
+        id: push-image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ env.REPOSITORY }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        run: |
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          echo "image=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+    outputs:
+      image: ${{ steps.push-image.outputs.image }}
+
+  deploy-container:
+    runs-on: [atmos-aws-arc-runner-set]
+    environment: dev
+    permissions:
+      id-token: write
+      contents: read
+    needs: build-container
+    steps:
+      - uses: Sanofi-InnerSource/github-actions-library/setup-root-ca@main
+      - uses: actions/checkout@v4
+        name: Checkout
+      # Comment for diveai runner
+      - name: Install AWS CLI
+        run: |
+          sudo apt update
+          sudo apt -y install curl unzip
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+          unzip awscliv2.zip
+          sudo ./aws/install
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.IAM_ROLE }}
+          role-session-name: github-session
+          aws-region: eu-west-1
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .github/workflows/.aws/${{ env.TASK_DEFINITION }}.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ needs.build-container.outputs.image }}
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true

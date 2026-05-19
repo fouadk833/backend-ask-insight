@@ -2,6 +2,7 @@ import { Injectable, HttpException, HttpStatus  } from '@nestjs/common';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
 import { HttpErrorHandler } from 'src/common/utils/http-error.handler';
+import { getFastApiBaseUrl } from 'src/utils/url.util';
 
 dotenv.config();
 // DTOs for type safety
@@ -33,13 +34,8 @@ export interface ScrollLoadingResponse<T> {
 
 @Injectable()
 export class DashbaordService {
-  private readonly fastApiUrl =
-    process.env.FASTAPI_URL || 'https://localhost:8000';
-
   private getBaseUrl(): string {
-    return this.fastApiUrl.startsWith('http')
-      ? this.fastApiUrl
-      : `https://${this.fastApiUrl}`;
+    return getFastApiBaseUrl();
   }
 
   // Cursor-based Pagination - Fetch dashboards

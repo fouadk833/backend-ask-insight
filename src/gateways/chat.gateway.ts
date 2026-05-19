@@ -210,6 +210,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             (client: WebSocket & { workflow_uuid?: string }) => {
               if (
                 client.readyState === WebSocket.OPEN &&
+                client.workflow_uuid != null &&
                 this.normalizeUuid(client.workflow_uuid) ===
                   this.normalizeUuid(message.workflow_uuid)
               ) {
@@ -295,6 +296,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const workflowUuid = client.workflow_uuid;
+    if (!workflowUuid) return;
     console.log(`Handling sendMessage for workflow ${workflowUuid}`);
 
     try {

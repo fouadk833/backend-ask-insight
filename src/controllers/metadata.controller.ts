@@ -4,7 +4,6 @@ import { MsAuthGuard } from 'src/auth/ms-auth.guard';
 import { MetaDataService } from 'src/services/metadata.service';
 
 @Controller('metadata')
-@UseGuards(MsAuthGuard)
 export class MetaDataController {
   constructor(private readonly metaDataService: MetaDataService) {}
 

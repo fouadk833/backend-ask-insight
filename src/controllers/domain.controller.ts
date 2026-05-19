@@ -1,6 +1,6 @@
 // domain.controller.ts
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { MsAuthGuard } from '../auth/ms-auth.guard';
+import {  } from '../auth/ms-auth.guard';
 import { Request } from 'express';
 import { DomainService } from '../services/domain.service';
 import { AuthenticatedRequest } from 'src/auth/types/user-request.interface';

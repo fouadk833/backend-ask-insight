@@ -2,18 +2,14 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
 import { HttpErrorHandler } from 'src/common/utils/http-error.handler';
+import { getFastApiBaseUrl } from 'src/utils/url.util';
 
 dotenv.config();
 
 @Injectable()
 export class SchedulerService {
-  private readonly fastApiUrl =
-    process.env.FASTAPI_URL || 'https://localhost:8000';
-
   private getBaseUrl(): string {
-    return this.fastApiUrl.startsWith('https')
-      ? this.fastApiUrl
-      : `https://${this.fastApiUrl}`;
+    return getFastApiBaseUrl();
   }
 
   /**

@@ -8,19 +8,16 @@ import {
 import axios from 'axios';
 import { log } from 'console';
 import { CreateReviewDto } from 'src/dtos/create-review.dto';
+import { getFastApiBaseUrl } from 'src/utils/url.util';
 
 @Injectable()
 export class ReviewService {
-  private readonly fastApiUrl = process.env.FASTAPI_URL || 'https://localhost:8000';
-
   constructor() {}
 
   async createReview(payload: CreateReviewDto) {
     console.log('Creating review for message:', payload);
 
-    const baseUrl = this.fastApiUrl.startsWith('https')
-      ? this.fastApiUrl
-      : `https://${this.fastApiUrl}`;
+    const baseUrl = getFastApiBaseUrl();
     try {
       const response = await axios.post(`${baseUrl}/feedback`, payload);
       if (![200, 201].includes(response.status)) {

@@ -1,6 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
+import { getFastApiBaseUrl } from 'src/utils/url.util';
 dotenv.config();
 
 // DTOs for type safety
@@ -26,8 +27,6 @@ export interface ScrollLoadingResponse<T> {
 
 @Injectable()
 export class ConversationService {
-  private readonly fastApiUrl =
-    process.env.FASTAPI_URL || 'https://localhost:8000';
 
   // For cursor-based infinite scroll (better performance for large datasets)
   // Cursor-based Pagination 
@@ -41,9 +40,7 @@ export class ConversationService {
 
     try {
       const { user_id, domain, after, limit = 20 } = params;
-      const baseUrl = this.fastApiUrl.startsWith('https')
-        ? this.fastApiUrl
-        : `https://${this.fastApiUrl}`;
+      const baseUrl = getFastApiBaseUrl();
 
       const queryParams = new URLSearchParams();
       queryParams.append('user_id', user_id.toString());
@@ -112,9 +109,7 @@ export class ConversationService {
 
     try {
       const { conversation_id, user_id, domain, after, limit = 10 } = params;
-      const baseUrl = this.fastApiUrl.startsWith('https')
-        ? this.fastApiUrl
-        : `https://${this.fastApiUrl}`;
+      const baseUrl = getFastApiBaseUrl();
 
       const queryParams = new URLSearchParams();
       queryParams.append('metadata_key', domain.toString());
@@ -180,9 +175,7 @@ export class ConversationService {
     console.log('update conversation name...');
     try {
       const { user_id, domain } = params;
-      const baseUrl = this.fastApiUrl.startsWith('https')
-        ? this.fastApiUrl
-        : `https://${this.fastApiUrl}`;
+      const baseUrl = getFastApiBaseUrl();
 
       const queryParams = new URLSearchParams();
       queryParams.append('metadata_key', domain.toString());
@@ -246,9 +239,7 @@ export class ConversationService {
     console.log('delete conversation...');
     try {
       const { user_id, domain } = params;
-      const baseUrl = this.fastApiUrl.startsWith('https')
-        ? this.fastApiUrl
-        : `https://${this.fastApiUrl}`;
+      const baseUrl = getFastApiBaseUrl();
 
 
 

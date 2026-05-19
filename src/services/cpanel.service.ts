@@ -1,18 +1,15 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
+import { getFastApiBaseUrl } from 'src/utils/url.util';
 
 dotenv.config();
 
 @Injectable()
 export class CpanelService {
-  private readonly fastApiUrl =
-    process.env.FASTAPI_URL || 'https://localhost:8000';
 
   async getDomainsByEmail(email: string): Promise<any> {
-    const baseUrl = this.fastApiUrl.startsWith('http')
-      ? this.fastApiUrl
-      : `https://${this.fastApiUrl}`;
+    const baseUrl = getFastApiBaseUrl();
 
     const url = `${baseUrl}/domains`;
     console.log(`🔗 Fetching domains for email: ${email}`);
@@ -26,9 +23,7 @@ export class CpanelService {
   }
 
   async getDomains(userId: string): Promise<any> {
-    const baseUrl = this.fastApiUrl.startsWith('http')
-      ? this.fastApiUrl
-      : `https://${this.fastApiUrl}`;
+    const baseUrl = getFastApiBaseUrl();
 
     const url = `${baseUrl}/cpanel/domains`;
     console.log(`🔗 Fetching cpanel domains for user: ${userId}`);
@@ -72,9 +67,7 @@ export class CpanelService {
   }
 
   async getAllUsers(userId: string): Promise<any> {
-    const baseUrl = this.fastApiUrl.startsWith('http')
-      ? this.fastApiUrl
-      : `https://${this.fastApiUrl}`;
+    const baseUrl = getFastApiBaseUrl();
 
     const url = `${baseUrl}/cpanel/users/all`;
     console.log(`👥 Fetching all users for: ${userId}`);
@@ -102,9 +95,7 @@ export class CpanelService {
   }
 
   async getDomainById(domainId: string, userId: string): Promise<any> {
-    const baseUrl = this.fastApiUrl.startsWith('http')
-      ? this.fastApiUrl
-      : `https://${this.fastApiUrl}`;
+    const baseUrl = getFastApiBaseUrl();
 
     const url = `${baseUrl}/cpanel/domains/${domainId}`;
     console.log(`🔍 Fetching domain ${domainId} for user: ${userId}`);
@@ -132,9 +123,7 @@ export class CpanelService {
   }
 
   async updateDomain(domainId: string, userId: string, body: any): Promise<any> {
-    const baseUrl = this.fastApiUrl.startsWith('http')
-      ? this.fastApiUrl
-      : `https://${this.fastApiUrl}`;
+    const baseUrl = getFastApiBaseUrl();
 
     const url = `${baseUrl}/cpanel/domains/${domainId}`;
     console.log(`✏️ Updating domain ${domainId} for user: ${userId}`);
@@ -162,9 +151,7 @@ export class CpanelService {
   }
 
   async deleteDomain(domainId: string, userId: string): Promise<any> {
-    const baseUrl = this.fastApiUrl.startsWith('http')
-      ? this.fastApiUrl
-      : `https://${this.fastApiUrl}`;
+    const baseUrl = getFastApiBaseUrl();
 
     const url = `${baseUrl}/cpanel/domains/${domainId}`;
     console.log(`🗑️ Deleting domain ${domainId} for user: ${userId}`);
@@ -192,9 +179,7 @@ export class CpanelService {
   }
 
   async createDomain(userId: string, body: any): Promise<any> {
-    const baseUrl = this.fastApiUrl.startsWith('http')
-      ? this.fastApiUrl
-      : `https://${this.fastApiUrl}`;
+    const baseUrl = getFastApiBaseUrl();
 
     const url = `${baseUrl}/cpanel/domains`;
     console.log(`📝 Creating domain for user: ${userId}`);
@@ -256,7 +241,7 @@ export class CpanelService {
   }
 
   private getBaseUrl(): string {
-    return this.fastApiUrl.startsWith('http') ? this.fastApiUrl : `https://${this.fastApiUrl}`;
+    return getFastApiBaseUrl();
   }
 
   async getCategoriesMetadata(userId: string): Promise<any> {

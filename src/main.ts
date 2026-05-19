@@ -16,30 +16,30 @@ async function bootstrap() {
   expressApp.use(require('express').json({ limit: '10mb' }));
   expressApp.use(require('express').urlencoded({ limit: '10mb', extended: true }));
 
-  const allowedOrigins = [
-    'http://localhost:8502', // Vite local dev
-    'http://localhost:3000', // React local dev
-    'https://localhost:3000',
-    'https://opella-periscope.p211125721469.aws-emea.sanofi.com', // Vite DEV
-  ];
-
-  // CORS configuration
-  app.enableCors(
-    {
-    origin: (origin, callback) => {
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        /^https:\/\/([a-zA-Z0-9-]+\.)*sanofi\.com$/.test(origin)
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS blocked for origin: ${origin}`));
-      }
-    },
-    credentials: true,
+  if (process.env.DISABLE_CORS === 'true') {
+    app.enableCors();
+  } else {
+    const allowedOrigins = [
+      'http://localhost:8502',
+      'http://localhost:3000',
+      'https://localhost:3000',
+      'https://opella-periscope.p211125721469.aws-emea.sanofi.com',
+    ];
+    app.enableCors({
+      origin: (origin, callback) => {
+        if (
+          !origin ||
+          allowedOrigins.includes(origin) ||
+          /^https:\/\/([a-zA-Z0-9-]+\.)*sanofi\.com$/.test(origin)
+        ) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS blocked for origin: ${origin}`));
+        }
+      },
+      credentials: false,
+    });
   }
-);
 
   const config = new DocumentBuilder()
     .setTitle('Opella Periscope API')

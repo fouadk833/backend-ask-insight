@@ -1,13 +1,12 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
+import { getFastApiBaseUrl } from 'src/utils/url.util';
 
 dotenv.config();
 
 @Injectable()
 export class AutocompleteService {
-  private readonly fastApiUrl =
-    process.env.FASTAPI_URL || 'https://localhost:8000';
 
   async getAutocompleteSuggestions(
     query: string,
@@ -20,10 +19,7 @@ export class AutocompleteService {
     );
 
     try {
-      const baseUrl = this.fastApiUrl.startsWith('https')
-        ? this.fastApiUrl
-        : `https://${this.fastApiUrl}`;
-
+      const baseUrl = getFastApiBaseUrl();
       const url = `${baseUrl}/autocomplete`;
       console.log(`🔗 Fetching from: ${url}`);
 

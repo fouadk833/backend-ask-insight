@@ -45,7 +45,7 @@ import { CpanelService } from './services/cpanel.service';
   ],
   providers: [
     WorkFlowService, ChatGateway, MetaDataService, DomainService, ConversationService, ReviewService, DashbaordService, SchedulerService, CountriesService, AutocompleteService, CpanelService,
-    { provide: APP_GUARD, useClass: MsAuthGuard },
+    ...(process.env.DISABLE_AUTH !== 'true' ? [{ provide: APP_GUARD, useClass: MsAuthGuard }] : []),
   ],
 })
 export class AppModule {
